@@ -9,7 +9,7 @@ talks to this server.
 Setup:
     pip install flask flask-cors google-genai
 
-    export GEMINI_API_KEY="your-new-key-here"   # rotate the old one first
+    export GEMINI_API_KEY="AQ.Ab8RN6IhMOCHiJM4mc_8GJ-AlqSXrxnQ76LbunaQplqI3Nj_PA"   # rotate the old one first
     python toybot_backend.py
 
 Then point TOYBOT_ENDPOINT in toy-store.html at wherever you deploy this,
