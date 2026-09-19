@@ -43,7 +43,7 @@ sessions = {}
 def get_chat(session_id):
   if session_id not in sessions:
     sessions[session_id] = client.chats.create(
-        model="gemini-2.5-flash",
+        model="gemini-3.6-flash",
         config=types.GenerateContentConfig(
             system_instruction=TOYBOT_SYSTEM_INSTRUCTION,
             temperature=0.7,
