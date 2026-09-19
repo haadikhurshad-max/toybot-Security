@@ -74,15 +74,15 @@ sessions = {}
 
 
 def get_chat(session_id):
-    if session_id not in sessions:
-        sessions[session_id] = client.chats.create(
-            model="gemini-3.6-flash",
-            config=types.GenerateContentConfig(
-                system_instruction=TOYBOT_SYSTEM_INSTRUCTION,
-                temperature=0.7,
-            ),
-        )
-    return sessions[session_id]
+  if session_id not in sessions:
+    sessions[session_id] = client.chats.create(
+        model="gemini-2.5-flash",  # Updated to a stable, valid model
+        config=types.GenerateContentConfig(
+            system_instruction=TOYBOT_SYSTEM_INSTRUCTION,
+            temperature=0.7,
+        ),
+    )
+  return sessions[session_id]
 
 
 @app.route("/chat", methods=["POST"])
