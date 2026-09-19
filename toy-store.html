@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tinker & Co. — Toys worth growing up for</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14141F;
+    --ink-soft:#4B4B5A;
+    --paper:#FFFFFF;
+    --paper-soft:#F1F2F6;
+    --paper-line:#E3E4EC;
+    --marigold:#FFB627;
+    --bubblegum:#FF5D8F;
+    --mint:#3FC7A0;
+    --sky:#4EA8FF;
+    --radius-card:20px;
+    --radius-pill:999px;
+    --shadow-card:0 10px 30px rgba(20,20,31,0.08);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#F4F4F8;
+      --ink-soft:#B7B7C6;
+      --paper:#15151F;
+      --paper-soft:#1C1C29;
+      --paper-line:#2C2C3B;
+      --shadow-card:0 10px 30px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#F4F4F8;
+    --ink-soft:#B7B7C6;
+    --paper:#15151F;
+    --paper-soft:#1C1C29;
+    --paper-line:#2C2C3B;
+    --shadow-card:0 10px 30px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Manrope',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2','Manrope',sans-serif;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+  @media (max-width:640px){.wrap{padding:0 18px;}}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--paper-line);
+  }
+  .header-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 0;gap:16px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.35rem;
+  }
+  .logo-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--bubblegum),var(--marigold));
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;transform:rotate(-8deg);
+    flex-shrink:0;
+  }
+  .header-actions{display:flex;align-items:center;gap:10px;}
+  .icon-btn{
+    border:1px solid var(--paper-line);background:var(--paper);
+    color:var(--ink);border-radius:var(--radius-pill);
+    padding:10px 16px;font-weight:600;font-size:0.9rem;
+    display:flex;align-items:center;gap:8px;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .icon-btn:hover{border-color:var(--ink);}
+  .icon-btn:active{transform:scale(0.96);}
+  .cart-count{
+    background:var(--ink);color:var(--paper);
+    border-radius:var(--radius-pill);
+    min-width:20px;height:20px;padding:0 6px;
+    font-size:0.72rem;display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{padding:64px 0 40px;}
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:center;
+  }
+  @media (max-width:860px){.hero-grid{grid-template-columns:1fr;gap:36px;}}
+  .eyebrow-free h1{font-size:clamp(2.3rem,4.6vw,3.6rem);line-height:1.06;}
+  .hero p.sub{
+    margin-top:18px;font-size:1.08rem;line-height:1.6;color:var(--ink-soft);
+    max-width:46ch;
+  }
+  .hero-cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+  .btn{
+    border-radius:var(--radius-pill);padding:14px 26px;font-weight:700;
+    font-size:0.98rem;border:2px solid transparent;transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--ink);color:var(--paper);}
+  .btn-primary:hover{opacity:0.88;}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--paper-line);}
+  .btn-ghost:hover{border-color:var(--ink);}
+
+  .shelf{
+    position:relative;height:340px;
+  }
+  .shelf-block{
+    position:absolute;border-radius:22px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:2rem;box-shadow:var(--shadow-card);
+    opacity:0;transform:translateY(24px) rotate(var(--r,0deg)) scale(0.8);
+    animation:pop 0.6s cubic-bezier(.2,.9,.3,1.3) forwards;
+  }
+  @keyframes pop{
+    to{opacity:1;transform:translateY(0) rotate(var(--r,0deg)) scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .shelf-block{animation:none;opacity:1;transform:rotate(var(--r,0deg));}
+  }
+
+  /* ---------- Filter bar ---------- */
+  .filter-bar{
+    display:flex;gap:10px;flex-wrap:wrap;
+    padding:8px 0 30px;
+  }
+  .chip{
+    border:1px solid var(--paper-line);background:var(--paper);
+    color:var(--ink-soft);border-radius:var(--radius-pill);
+    padding:9px 18px;font-weight:600;font-size:0.88rem;
+    transition:all .15s ease;
+  }
+  .chip.active,.chip:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+
+  /* ---------- Product grid ---------- */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .section-head h2{font-size:1.7rem;}
+  .count-note{color:var(--ink-soft);font-size:0.92rem;}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:22px;padding-bottom:70px;
+  }
+  .card{
+    background:var(--paper);border:1px solid var(--paper-line);
+    border-radius:var(--radius-card);overflow:hidden;
+    box-shadow:var(--shadow-card);
+    opacity:0;transform:translateY(22px);
+    transition:opacity .55s ease, transform .55s ease;
+    display:flex;flex-direction:column;
+  }
+  .card.in-view{opacity:1;transform:translateY(0);}
+  .card-media{
+    aspect-ratio:1/1;width:100%;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    font-size:3rem;color:var(--paper);
+  }
+  .card-media img{width:100%;height:100%;object-fit:cover;}
+  .card-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .card-cat{
+    font-size:0.74rem;font-weight:700;color:var(--bubblegum);
+  }
+  .card-name{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.12rem;}
+  .card-desc{
+    color:var(--ink-soft);font-size:0.9rem;line-height:1.5;
+    flex:1;
+  }
+  .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px;}
+  .price{font-weight:800;font-size:1.05rem;font-family:'Baloo 2',sans-serif;}
+  .add-btn{
+    background:var(--ink);color:var(--paper);border-radius:var(--radius-pill);
+    padding:9px 16px;font-weight:700;font-size:0.85rem;border:none;
+    transition:transform .15s ease;
+  }
+  .add-btn:active{transform:scale(0.95);}
+  .card-admin-row{
+    display:flex;gap:8px;padding:0 18px 16px;
+  }
+  .mini-btn{
+    flex:1;border-radius:10px;border:1px solid var(--paper-line);
+    background:var(--paper-soft);color:var(--ink);
+    padding:8px;font-weight:600;font-size:0.8rem;
+  }
+  .mini-btn.danger{color:var(--bubblegum);}
+
+  .empty-state{
+    text-align:center;padding:70px 20px;border:1.5px dashed var(--paper-line);
+    border-radius:var(--radius-card);color:var(--ink-soft);
+  }
+  .empty-state .display{font-size:1.3rem;color:var(--ink);margin-bottom:8px;}
+
+  /* ---------- Admin panel ---------- */
+  .admin-panel{
+    max-width:1180px;margin:0 auto 60px;padding:0 28px;
+  }
+  .admin-card{
+    background:var(--paper-soft);border:1px solid var(--paper-line);
+    border-radius:var(--radius-card);padding:26px;
+  }
+  .admin-card h3{font-size:1.25rem;margin-bottom:4px;}
+  .admin-card .hint{color:var(--ink-soft);font-size:0.88rem;margin-bottom:20px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:0.82rem;font-weight:700;color:var(--ink-soft);}
+  .field input[type=text],
+  .field input[type=number],
+  .field textarea,
+  .field select{
+    border:1px solid var(--paper-line);border-radius:12px;
+    padding:11px 14px;font-family:inherit;font-size:0.95rem;
+    background:var(--paper);color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:80px;}
+  .field input:focus,.field textarea:focus,.field select:focus{
+    outline:2px solid var(--sky);outline-offset:1px;
+  }
+  .image-drop{
+    border:1.5px dashed var(--paper-line);border-radius:14px;
+    padding:16px;display:flex;align-items:center;gap:14px;
+    background:var(--paper);
+  }
+  .image-preview{
+    width:64px;height:64px;border-radius:10px;background:var(--paper-soft);
+    display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+    overflow:hidden;flex-shrink:0;
+  }
+  .image-preview img{width:100%;height:100%;object-fit:cover;}
+  .admin-form-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--paper);padding:14px 22px;border-radius:var(--radius-pill);
+    font-weight:600;font-size:0.9rem;box-shadow:var(--shadow-card);
+    opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
+    z-index:100;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- Cart drawer ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,10,16,0.45);
+    opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:60;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:fixed;top:0;right:0;height:100%;width:min(400px,92vw);
+    background:var(--paper);z-index:70;box-shadow:-10px 0 40px rgba(0,0,0,0.2);
+    transform:translateX(100%);transition:transform .3s ease;
+    display:flex;flex-direction:column;
+  }
+  .drawer.show{transform:translateX(0);}
+  .drawer-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 22px 16px;border-bottom:1px solid var(--paper-line);
+  }
+  .drawer-head h3{font-size:1.2rem;}
+  .close-x{
+    background:none;border:none;font-size:1.4rem;color:var(--ink-soft);line-height:1;
+  }
+  .drawer-body{flex:1;overflow-y:auto;padding:16px 22px;}
+  .cart-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--paper-line);}
+  .cart-item .thumb{
+    width:56px;height:56px;border-radius:10px;background:var(--paper-soft);
+    display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+    overflow:hidden;flex-shrink:0;
+  }
+  .cart-item .thumb img{width:100%;height:100%;object-fit:cover;}
+  .cart-item-info{flex:1;display:flex;flex-direction:column;gap:4px;}
+  .cart-item-info .name{font-weight:700;font-size:0.92rem;}
+  .qty-row{display:flex;align-items:center;gap:10px;margin-top:2px;}
+  .qty-btn{
+    width:24px;height:24px;border-radius:8px;border:1px solid var(--paper-line);
+    background:var(--paper-soft);font-weight:700;font-size:0.85rem;
+  }
+  .remove-link{color:var(--bubblegum);font-size:0.8rem;font-weight:700;background:none;border:none;padding:0;margin-top:4px;align-self:flex-start;}
+  .drawer-foot{padding:20px 22px;border-top:1px solid var(--paper-line);}
+  .total-row{display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;margin-bottom:14px;font-family:'Baloo 2',sans-serif;}
+  .empty-cart{color:var(--ink-soft);text-align:center;padding:50px 10px;font-size:0.92rem;}
+
+  footer{
+    border-top:1px solid var(--paper-line);padding:34px 0;
+    color:var(--ink-soft);font-size:0.85rem;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+
+  .hidden{display:none !important;}
+
+  /* ---------- ToyBot chat widget ---------- */
+  .toybot-fab{
+    position:fixed;bottom:24px;right:24px;z-index:80;
+    width:60px;height:60px;border-radius:50%;border:none;
+    background:linear-gradient(135deg,var(--bubblegum),var(--marigold));
+    color:#fff;font-size:1.6rem;box-shadow:var(--shadow-card);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .15s ease;
+  }
+  .toybot-fab:hover{transform:scale(1.06);}
+  .toybot-fab:active{transform:scale(0.95);}
+
+  .toybot-panel{
+    position:fixed;bottom:96px;right:24px;z-index:80;
+    width:min(360px, calc(100vw - 32px));height:min(520px, calc(100vh - 140px));
+    background:var(--paper);border:1px solid var(--paper-line);
+    border-radius:20px;box-shadow:var(--shadow-card);
+    display:flex;flex-direction:column;overflow:hidden;
+    transform:translateY(16px) scale(0.98);opacity:0;pointer-events:none;
+    transition:transform .2s ease, opacity .2s ease;
+  }
+  .toybot-panel.show{transform:translateY(0) scale(1);opacity:1;pointer-events:auto;}
+  .toybot-head{
+    background:linear-gradient(135deg,var(--bubblegum),var(--marigold));
+    color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;
+  }
+  .toybot-head h4{font-family:'Baloo 2',sans-serif;font-size:1.05rem;margin:0;}
+  .toybot-head .sub{font-size:0.75rem;opacity:0.9;}
+  .toybot-close{background:none;border:none;color:#fff;font-size:1.3rem;line-height:1;}
+  .toybot-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--paper-soft);}
+  .toybot-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:0.9rem;line-height:1.45;}
+  .toybot-msg.bot{background:var(--paper);border:1px solid var(--paper-line);align-self:flex-start;border-bottom-left-radius:4px;}
+  .toybot-msg.user{background:var(--ink);color:var(--paper);align-self:flex-end;border-bottom-right-radius:4px;}
+  .toybot-msg.error{background:#FFE3E3;color:#B3261E;align-self:flex-start;border-bottom-left-radius:4px;}
+  .toybot-typing{display:flex;gap:4px;align-self:flex-start;padding:10px 14px;}
+  .toybot-typing span{width:6px;height:6px;border-radius:50%;background:var(--ink-soft);animation:blink 1.2s infinite ease-in-out;}
+  .toybot-typing span:nth-child(2){animation-delay:.2s;}
+  .toybot-typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:0.25;}40%{opacity:1;}}
+  .toybot-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--paper-line);background:var(--paper);}
+  .toybot-input-row input{
+    flex:1;border:1px solid var(--paper-line);border-radius:var(--radius-pill);
+    padding:10px 16px;font-family:inherit;font-size:0.9rem;background:var(--paper-soft);color:var(--ink);
+  }
+  .toybot-input-row input:focus{outline:2px solid var(--sky);outline-offset:1px;}
+  .toybot-send{
+    background:var(--ink);color:#fff;border:none;border-radius:50%;
+    width:40px;height:40px;flex-shrink:0;font-size:1.05rem;
+  }
+  @media (max-width:480px){
+    .toybot-panel{right:16px;bottom:88px;}
+    .toybot-fab{right:16px;bottom:16px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-row">
+    <div class="logo"><span class="logo-mark">🧸</span><span>Tinker &amp; Co.</span></div>
+    <div class="header-actions">
+      <button class="icon-btn" id="adminToggleBtn">⚙️ Manage store</button>
+      <button class="icon-btn" id="cartBtn">🛒 Cart <span class="cart-count" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="eyebrow-free">
+      <h1>Toys worth<br>growing up for.</h1>
+      <p class="sub">A small shelf of well-made, well-loved toys — picked for the kind of play that sticks around long after bedtime.</p>
+      <div class="hero-cta">
+        <a href="#shop" class="btn btn-primary">Shop the shelf</a>
+        <button class="btn btn-ghost" id="heroAdminBtn">Add your own toys</button>
+      </div>
+    </div>
+    <div class="shelf" id="shelf"></div>
+  </div>
+</section>
+
+<main class="wrap" id="shop">
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="section-head">
+    <h2>The shelf</h2>
+    <span class="count-note" id="countNote"></span>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</main>
+
+<div class="admin-panel hidden" id="adminPanel">
+  <div class="admin-card">
+    <h3 id="formTitle">Add a toy</h3>
+    <p class="hint">This fills the shop above — everything here is saved in this browser.</p>
+    <form id="toyForm">
+      <input type="hidden" id="toyId">
+      <div class="form-grid">
+        <div class="field">
+          <label for="toyName">Name</label>
+          <input type="text" id="toyName" placeholder="e.g. Rainbow Stacking Blocks" required>
+        </div>
+        <div class="field">
+          <label for="toyPrice">Price (USD)</label>
+          <input type="number" id="toyPrice" min="0" step="0.01" placeholder="24.00" required>
+        </div>
+        <div class="field">
+          <label for="toyCategory">Category</label>
+          <input type="text" id="toyCategory" placeholder="e.g. Building, Plush, Outdoor" required>
+        </div>
+        <div class="field">
+          <label for="toyEmoji">Fallback icon (emoji, used if no photo)</label>
+          <input type="text" id="toyEmoji" placeholder="🧩" maxlength="4">
+        </div>
+        <div class="field full">
+          <label for="toyDesc">Description</label>
+          <textarea id="toyDesc" placeholder="What makes this toy worth playing with?" required></textarea>
+        </div>
+        <div class="field full">
+          <label for="toyImage">Photo</label>
+          <div class="image-drop">
+            <div class="image-preview" id="imagePreview">🖼️</div>
+            <div style="flex:1;">
+              <input type="file" id="toyImage" accept="image/*">
+              <div class="hint" style="margin:6px 0 0;">Optional — square photos look best.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-form-actions">
+        <button type="submit" class="btn btn-primary" id="saveBtn">Save toy</button>
+        <button type="button" class="btn btn-ghost" id="cancelEditBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="wrap">
+  <span>© <span id="year"></span> Tinker &amp; Co.</span>
+  <span>Made for people who never stopped playing.</span>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Your cart</h3>
+    <button class="close-x" id="closeDrawerBtn">×</button>
+  </div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Total</span><span id="cartTotal">$0.00</span></div>
+    <button class="btn btn-primary" style="width:100%;" id="checkoutBtn">Checkout</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<button class="toybot-fab" id="toybotFab" aria-label="Chat with ToyBot">🧸</button>
+<div class="toybot-panel" id="toybotPanel">
+  <div class="toybot-head">
+    <div>
+      <h4>ToyBot</h4>
+      <div class="sub">Usually replies in a few seconds</div>
+    </div>
+    <button class="toybot-close" id="toybotClose" aria-label="Close chat">×</button>
+  </div>
+  <div class="toybot-messages" id="toybotMessages"></div>
+  <div class="toybot-input-row">
+    <input type="text" id="toybotInput" placeholder="Ask ToyBot anything...">
+    <button class="toybot-send" id="toybotSend" aria-label="Send">➤</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "tinkerco_toys_v1";
+  var CART_KEY = "tinkerco_cart_v1";
+
+  var defaultToys = [
+    {id:"t1", name:"Rainbow Stacking Blocks", price:24, category:"Building", emoji:"🧩", desc:"Chunky beechwood blocks in six colors, sized for small hands and big towers.", image:null},
+    {id:"t2", name:"Cloud Plush Bear", price:19, category:"Plush", emoji:"🧸", desc:"Impossibly soft, machine-washable, and just the right size for a nap co-pilot.", image:null},
+    {id:"t3", name:"Backyard Rocket Kit", price:32, category:"Outdoor", emoji:"🚀", desc:"Pump it, launch it, chase it — a foam rocket that survives the whole summer.", image:null},
+    {id:"t4", name:"Wobble Balance Board", price:38, category:"Active Play", emoji:"🛹", desc:"A rounded wooden board for balancing, rocking, and turning into a bridge.", image:null},
+    {id:"t5", name:"Puzzle Town, 48pc", price:16, category:"Building", emoji:"🧩", desc:"A tiny illustrated town that comes together piece by piece on a rainy day.", image:null},
+    {id:"t6", name:"Kite Duo, Sky Set", price:21, category:"Outdoor", emoji:"🪁", desc:"Two easy-fly kites built for a breezy afternoon and very little wind.", image:null}
+  ];
+
+  var shelfIcons = ["🧸","🚀","🎲","🪁","🧩","🎨"];
+  var shelfColors = ["var(--bubblegum)","var(--marigold)","var(--mint)","var(--sky)"];
+
+  function loadToys(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){ /* storage unavailable, fall back to defaults */ }
+    return defaultToys.slice();
+  }
+  function saveToys(list){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+    catch(e){ showToast("Couldn't save — your browser storage may be full."); }
+  }
+  function loadCart(){
+    try{
+      var raw = localStorage.getItem(CART_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return {};
+  }
+  function saveCart(cart){
+    try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){}
+  }
+
+  var toys = loadToys();
+  var cart = loadCart();
+  var activeCategory = "All";
+  var editingId = null;
+
+  var grid = document.getElementById("productGrid");
+  var filterBar = document.getElementById("filterBar");
+  var countNote = document.getElementById("countNote");
+  var adminPanel = document.getElementById("adminPanel");
+  var toast = document.getElementById("toast");
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ toast.classList.remove("show"); }, 2200);
+  }
+
+  function money(n){ return "$" + Number(n).toFixed(2); }
+
+  function categories(){
+    var set = {};
+    toys.forEach(function(t){ set[t.category] = true; });
+    return Object.keys(set);
+  }
+
+  function renderFilters(){
+    var cats = ["All"].concat(categories());
+    filterBar.innerHTML = "";
+    cats.forEach(function(c){
+      var btn = document.createElement("button");
+      btn.className = "chip" + (c === activeCategory ? " active" : "");
+      btn.textContent = c;
+      btn.addEventListener("click", function(){
+        activeCategory = c;
+        renderFilters();
+        renderGrid();
+      });
+      filterBar.appendChild(btn);
+    });
+  }
+
+  function renderGrid(){
+    var isAdmin = !adminPanel.classList.contains("hidden");
+    var list = activeCategory === "All" ? toys : toys.filter(function(t){ return t.category === activeCategory; });
+    countNote.textContent = list.length + (list.length === 1 ? " toy" : " toys");
+    grid.innerHTML = "";
+
+    if(list.length === 0){
+      var empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.style.gridColumn = "1/-1";
+      empty.innerHTML = '<div class="display">The shelf is empty here</div><p>' +
+        (toys.length === 0 ? "Add your first toy to get started." : "No toys in this category yet.") + '</p>';
+      grid.appendChild(empty);
+      return;
+    }
+
+    list.forEach(function(t){
+      var card = document.createElement("div");
+      card.className = "card";
+      card.dataset.id = t.id;
+
+      var media = document.createElement("div");
+      media.className = "card-media";
+      media.style.background = t.image ? "none" : "linear-gradient(135deg, var(--bubblegum), var(--marigold))";
+      if(t.image){
+        var img = document.createElement("img");
+        img.src = t.image;
+        img.alt = t.name;
+        media.appendChild(img);
+      } else {
+        media.textContent = t.emoji || "🧸";
+      }
+
+      var body = document.createElement("div");
+      body.className = "card-body";
+      body.innerHTML =
+        '<div class="card-cat">' + escapeHtml(t.category) + '</div>' +
+        '<div class="card-name">' + escapeHtml(t.name) + '</div>' +
+        '<div class="card-desc">' + escapeHtml(t.desc) + '</div>' +
+        '<div class="card-foot"><span class="price">' + money(t.price) + '</span></div>';
+
+      var addBtn = document.createElement("button");
+      addBtn.className = "add-btn";
+      addBtn.textContent = "Add to cart";
+      addBtn.addEventListener("click", function(){ addToCart(t.id); });
+      body.querySelector(".card-foot").appendChild(addBtn);
+
+      card.appendChild(media);
+      card.appendChild(body);
+
+      if(isAdmin){
+        var row = document.createElement("div");
+        row.className = "card-admin-row";
+        var editBtn = document.createElement("button");
+        editBtn.className = "mini-btn";
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", function(){ startEdit(t.id); });
+        var delBtn = document.createElement("button");
+        delBtn.className = "mini-btn danger";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", function(){ deleteToy(t.id); });
+        row.appendChild(editBtn);
+        row.appendChild(delBtn);
+        card.appendChild(row);
+      }
+
+      grid.appendChild(card);
+    });
+
+    observeCards();
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement("div");
+    d.textContent = str == null ? "" : str;
+    return d.innerHTML;
+  }
+
+  // ---- scroll fade-in reveal for the product grid ----
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add("in-view");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.15});
+
+  function observeCards(){
+    var cards = grid.querySelectorAll(".card:not(.in-view)");
+    cards.forEach(function(c, i){
+      c.style.transitionDelay = Math.min(i * 60, 360) + "ms";
+      observer.observe(c);
+    });
+  }
+
+  // ---- hero shelf ----
+  function renderShelf(){
+    var shelf = document.getElementById("shelf");
+    var positions = [
+      {top:"4%", left:"8%", size:96}, {top:"2%", left:"52%", size:78},
+      {top:"34%", left:"0%", size:84}, {top:"30%", left:"66%", size:104},
+      {top:"64%", left:"22%", size:90}, {top:"62%", left:"78%", size:70}
+    ];
+    shelf.innerHTML = "";
+    positions.forEach(function(p, i){
+      var b = document.createElement("div");
+      b.className = "shelf-block";
+      var rot = (i % 2 === 0 ? -1 : 1) * (6 + i * 2);
+      b.style.setProperty("--r", rot + "deg");
+      b.style.top = p.top; b.style.left = p.left;
+      b.style.width = p.size + "px"; b.style.height = p.size + "px";
+      b.style.background = shelfColors[i % shelfColors.length];
+      b.style.animationDelay = (i * 90) + "ms";
+      b.textContent = shelfIcons[i % shelfIcons.length];
+      shelf.appendChild(b);
+    });
+  }
+
+  // ---- cart ----
+  var cartCountEl = document.getElementById("cartCount");
+  var cartBody = document.getElementById("cartBody");
+  var cartTotalEl = document.getElementById("cartTotal");
+  var drawer = document.getElementById("drawer");
+  var overlay = document.getElementById("overlay");
+
+  function addToCart(id){
+    cart[id] = (cart[id] || 0) + 1;
+    saveCart(cart);
+    renderCart();
+    showToast("Added to cart");
+  }
+  function changeQty(id, delta){
+    if(!cart[id]) return;
+    cart[id] += delta;
+    if(cart[id] <= 0) delete cart[id];
+    saveCart(cart);
+    renderCart();
+  }
+  function removeFromCart(id){
+    delete cart[id];
+    saveCart(cart);
+    renderCart();
+  }
+
+  function renderCart(){
+    var ids = Object.keys(cart);
+    var total = 0;
+    var count = 0;
+    ids.forEach(function(id){ count += cart[id]; });
+    cartCountEl.textContent = count;
+
+    cartBody.innerHTML = "";
+    if(ids.length === 0){
+      cartBody.innerHTML = '<div class="empty-cart">Nothing here yet — go find a toy you like.</div>';
+    } else {
+      ids.forEach(function(id){
+        var t = toys.find(function(x){ return x.id === id; });
+        if(!t) return;
+        total += t.price * cart[id];
+
+        var row = document.createElement("div");
+        row.className = "cart-item";
+
+        var thumb = document.createElement("div");
+        thumb.className = "thumb";
+        if(t.image){
+          var img = document.createElement("img"); img.src = t.image; thumb.appendChild(img);
+        } else {
+          thumb.textContent = t.emoji || "🧸";
+        }
+
+        var info = document.createElement("div");
+        info.className = "cart-item-info";
+        info.innerHTML = '<div class="name">' + escapeHtml(t.name) + '</div><div>' + money(t.price) + '</div>';
+
+        var qtyRow = document.createElement("div");
+        qtyRow.className = "qty-row";
+        var minus = document.createElement("button"); minus.className = "qty-btn"; minus.textContent = "–";
+        minus.addEventListener("click", function(){ changeQty(id, -1); });
+        var qty = document.createElement("span"); qty.textContent = cart[id];
+        var plus = document.createElement("button"); plus.className = "qty-btn"; plus.textContent = "+";
+        plus.addEventListener("click", function(){ changeQty(id, 1); });
+        qtyRow.appendChild(minus); qtyRow.appendChild(qty); qtyRow.appendChild(plus);
+        info.appendChild(qtyRow);
+
+        var remove = document.createElement("button");
+        remove.className = "remove-link"; remove.textContent = "Remove";
+        remove.addEventListener("click", function(){ removeFromCart(id); });
+        info.appendChild(remove);
+
+        row.appendChild(thumb);
+        row.appendChild(info);
+        cartBody.appendChild(row);
+      });
+    }
+    cartTotalEl.textContent = money(total);
+  }
+
+  function openDrawer(){ drawer.classList.add("show"); overlay.classList.add("show"); }
+  function closeDrawer(){ drawer.classList.remove("show"); overlay.classList.remove("show"); }
+
+  document.getElementById("cartBtn").addEventListener("click", openDrawer);
+  document.getElementById("closeDrawerBtn").addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
+  document.getElementById("checkoutBtn").addEventListener("click", function(){
+    if(Object.keys(cart).length === 0){ showToast("Your cart is empty"); return; }
+    showToast("This is a demo — plug in real checkout when you're ready.");
+  });
+
+  // ---- admin form ----
+  var toyForm = document.getElementById("toyForm");
+  var toyIdField = document.getElementById("toyId");
+  var toyNameField = document.getElementById("toyName");
+  var toyPriceField = document.getElementById("toyPrice");
+  var toyCategoryField = document.getElementById("toyCategory");
+  var toyEmojiField = document.getElementById("toyEmoji");
+  var toyDescField = document.getElementById("toyDesc");
+  var toyImageField = document.getElementById("toyImage");
+  var imagePreview = document.getElementById("imagePreview");
+  var formTitle = document.getElementById("formTitle");
+  var cancelEditBtn = document.getElementById("cancelEditBtn");
+  var pendingImage = null;
+
+  toyImageField.addEventListener("change", function(){
+    var file = toyImageField.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      pendingImage = e.target.result;
+      imagePreview.innerHTML = "";
+      var img = document.createElement("img");
+      img.src = pendingImage;
+      imagePreview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function resetForm(){
+    toyForm.reset();
+    toyIdField.value = "";
+    pendingImage = null;
+    imagePreview.innerHTML = "🖼️";
+    formTitle.textContent = "Add a toy";
+    editingId = null;
+  }
+
+  function startEdit(id){
+    var t = toys.find(function(x){ return x.id === id; });
+    if(!t) return;
+    editingId = id;
+    toyIdField.value = t.id;
+    toyNameField.value = t.name;
+    toyPriceField.value = t.price;
+    toyCategoryField.value = t.category;
+    toyEmojiField.value = t.emoji || "";
+    toyDescField.value = t.desc;
+    pendingImage = t.image || null;
+    imagePreview.innerHTML = t.image ? '<img src="' + t.image + '">' : (t.emoji || "🖼️");
+    formTitle.textContent = "Edit toy";
+    adminPanel.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function deleteToy(id){
+    toys = toys.filter(function(t){ return t.id !== id; });
+    saveToys(toys);
+    renderFilters();
+    renderGrid();
+    renderCart();
+    showToast("Toy removed");
+  }
+
+  toyForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var name = toyNameField.value.trim();
+    var price = parseFloat(toyPriceField.value);
+    var category = toyCategoryField.value.trim() || "Uncategorized";
+    var emoji = toyEmojiField.value.trim() || "🧸";
+    var desc = toyDescField.value.trim();
+
+    if(!name || isNaN(price) || !desc){ showToast("Fill in name, price and description"); return; }
+
+    if(editingId){
+      var t = toys.find(function(x){ return x.id === editingId; });
+      t.name = name; t.price = price; t.category = category; t.emoji = emoji; t.desc = desc;
+      if(pendingImage !== undefined) t.image = pendingImage;
+      showToast("Toy updated");
+    } else {
+      toys.push({
+        id: "t" + Date.now(),
+        name: name, price: price, category: category, emoji: emoji, desc: desc,
+        image: pendingImage
+      });
+      showToast("Toy added to the shelf");
+    }
+    saveToys(toys);
+    resetForm();
+    renderFilters();
+    renderGrid();
+  });
+
+  cancelEditBtn.addEventListener("click", resetForm);
+
+  // ---- admin panel toggle ----
+  var adminToggleBtn = document.getElementById("adminToggleBtn");
+  var heroAdminBtn = document.getElementById("heroAdminBtn");
+
+  function toggleAdmin(forceOpen){
+    var willOpen = forceOpen !== undefined ? forceOpen : adminPanel.classList.contains("hidden");
+    adminPanel.classList.toggle("hidden", !willOpen);
+    adminToggleBtn.textContent = willOpen ? "✕ Close manager" : "⚙️ Manage store";
+    if(willOpen){
+      adminPanel.scrollIntoView({behavior:"smooth", block:"start"});
+    } else {
+      resetForm();
+    }
+    renderGrid();
+  }
+  adminToggleBtn.addEventListener("click", function(){ toggleAdmin(); });
+  heroAdminBtn.addEventListener("click", function(){ toggleAdmin(true); });
+
+  // ---- init ----
+  document.getElementById("year").textContent = new Date().getFullYear();
+  renderShelf();
+  renderFilters();
+  renderGrid();
+  renderCart();
+})();
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- CONFIG ----
+  // Point this at your deployed backend's /chat endpoint (see toybot_backend.py).
+  // Example: "https://your-toybot-backend.onrender.com/chat"
+  var TOYBOT_ENDPOINT = "https://YOUR-BACKEND-URL/chat";
+
+  var sessionId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+
+  var fab = document.getElementById("toybotFab");
+  var panel = document.getElementById("toybotPanel");
+  var closeBtn = document.getElementById("toybotClose");
+  var messagesEl = document.getElementById("toybotMessages");
+  var input = document.getElementById("toybotInput");
+  var sendBtn = document.getElementById("toybotSend");
+
+  var greeted = false;
+
+  function addMessage(text, role){
+    var div = document.createElement("div");
+    div.className = "toybot-msg " + role;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping(){
+    var t = document.createElement("div");
+    t.className = "toybot-typing";
+    t.id = "toybotTyping";
+    t.innerHTML = "<span></span><span></span><span></span>";
+    messagesEl.appendChild(t);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  function hideTyping(){
+    var t = document.getElementById("toybotTyping");
+    if(t) t.remove();
+  }
+
+  function openPanel(){
+    panel.classList.add("show");
+    if(!greeted){
+      addMessage("Hello there! 🧸✨ Welcome to Tinker & Co.! I'm ToyBot — what are we shopping for today?", "bot");
+      greeted = true;
+    }
+    input.focus();
+  }
+  function closePanel(){ panel.classList.remove("show"); }
+
+  fab.addEventListener("click", function(){
+    panel.classList.contains("show") ? closePanel() : openPanel();
+  });
+  closeBtn.addEventListener("click", closePanel);
+
+  function sendMessage(){
+    var text = input.value.trim();
+    if(!text) return;
+    addMessage(text, "user");
+    input.value = "";
+    sendBtn.disabled = true;
+    showTyping();
+
+    fetch(TOYBOT_ENDPOINT, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message: text, session_id: sessionId})
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error("Bad response from server");
+      return res.json();
+    })
+    .then(function(data){
+      hideTyping();
+      addMessage(data.reply || "Sorry, I didn't catch that.", "bot");
+    })
+    .catch(function(err){
+      hideTyping();
+      addMessage("I'm having trouble connecting right now — check that the ToyBot backend is running and reachable.", "error");
+    })
+    .finally(function(){
+      sendBtn.disabled = false;
+    });
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keydown", function(e){
+    if(e.key === "Enter") sendMessage();
+  });
+})();
+</script>
+</body>
+</html>
