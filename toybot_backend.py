@@ -1,16 +1,56 @@
+"""
+ToyBot backend — Ollama edition.
+
+Runs the same /chat API your chat widget already talks to, but powered by a
+model running locally via Ollama instead of the Gemini cloud API. No API key,
+no rate limits, works fully offline.
+
+Setup:
+    1. Install Ollama: https://ollama.com
+    2. Pull a model (pick one that fits your hardware):
+           ollama pull llama3.1:8b      # good default, needs ~6GB RAM/VRAM
+           ollama pull qwen2.5:7b       # similar size, strong instruction following
+           ollama pull phi4             # smaller, lighter on weaker machines
+    3. Make sure Ollama is running (it usually starts automatically after
+       install; otherwise run `ollama serve` in a terminal).
+    4. pip install flask flask-cors requests
+    5. python toybot_backend.py
+
+The widget's TOYBOT_ENDPOINT in toy-store.html should point at:
+    http://localhost:5000/chat
+(or wherever you end up running this).
+
+Note: for a live demo, run this file and Ollama on the SAME machine you'll
+be demoing from, and open toy-store.html on that machine too — that's what
+gets you the "zero internet required" setup.
+"""
+
 import logging
 import os
 import uuid
 
+import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from google import genai
-from google.genai import types
 
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
+
+# In production, restrict this to your storefront's actual domain instead of "*", e.g.:
+# CORS(app, resources={r"/*": {"origins": "https://your-store-domain.com"}})
 CORS(app)
+
+# ---- Config (override via environment variables if you want to change these
+# without editing the file) ----
+OLLAMA_CHAT_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/chat")
+OLLAMA_TAGS_URL = os.environ.get("OLLAMA_TAGS_URL", "http://localhost:11434/api/tags")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.1:8b")
+REQUEST_TIMEOUT_SECONDS = int(os.environ.get("OLLAMA_TIMEOUT", "60"))
+
+# How many past turns (user+assistant messages) to keep sending as context.
+# Keeps requests fast and bounded instead of growing forever in a long chat.
+MAX_HISTORY_MESSAGES = 20
 
 TOYBOT_SYSTEM_INSTRUCTION = """
 You are ToyBot, the friendly, energetic, and helpful virtual assistant for ToyStore, an online store specializing in toys, games, and kid-friendly services.
@@ -31,60 +71,105 @@ You are ToyBot, the friendly, energetic, and helpful virtual assistant for ToySt
 - If a user asks about something completely unrelated to ToyStore, politely steer the conversation back to toys and gifts.
 """
 
-API_KEY = os.environ.get("GEMINI_API_KEY")
-if not API_KEY:
-  raise RuntimeError("GEMINI_API_KEY is not set as an environment variable.")
-
-client = genai.Client(api_key=API_KEY)
-
+# Unlike the Gemini SDK's chat objects, Ollama's /api/chat is stateless — you
+# send the full message list every time. So each session here is just a list
+# of {"role", "content"} dicts, starting with the system prompt.
 sessions = {}
 
 
-def get_chat(session_id):
-  if session_id not in sessions:
-    sessions[session_id] = client.chats.create(
-        model="gemini-3.6-flash",
-        config=types.GenerateContentConfig(
-            system_instruction=TOYBOT_SYSTEM_INSTRUCTION,
-            temperature=0.7,
-        ),
-    )
-  return sessions[session_id]
+def get_history(session_id):
+    if session_id not in sessions:
+        sessions[session_id] = [{"role": "system", "content": TOYBOT_SYSTEM_INSTRUCTION}]
+    return sessions[session_id]
+
+
+def trimmed_history(history):
+    # Always keep the system message (index 0), then only the most recent
+    # turns after it, so long conversations don't slow every request down.
+    return [history[0]] + history[1:][-MAX_HISTORY_MESSAGES:]
 
 
 @app.route("/chat", methods=["POST"])
 def chat():
-  data = request.get_json(force=True, silent=True) or {}
-  message = (data.get("message") or "").strip()
-  session_id = data.get("session_id") or str(uuid.uuid4())
+    data = request.get_json(force=True, silent=True) or {}
+    message = (data.get("message") or "").strip()
+    session_id = data.get("session_id") or str(uuid.uuid4())
 
-  if not message:
-    return jsonify({"error": "message is required"}), 400
+    if not message:
+        return jsonify({"error": "message is required"}), 400
 
-  try:
-    chat_session = get_chat(session_id)
-    response = chat_session.send_message(message)
+    history = get_history(session_id)
+    history.append({"role": "user", "content": message})
 
-    # response.text can raise (or be empty) if the model returned no usable
-    # candidate, e.g. blocked by a safety filter. Handle that explicitly
-    # instead of letting it fall into the generic except below.
-    reply_text = getattr(response, "text", None)
-    if not reply_text:
-      app.logger.warning("Gemini returned no text. Raw response: %r", response)
-      reply_text = "Sorry, I couldn't come up with an answer to that one — could you rephrase?"
+    try:
+        response = requests.post(
+            OLLAMA_CHAT_URL,
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": trimmed_history(history),
+                "stream": False,
+                "options": {"temperature": 0.7},
+            },
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        reply_text = (payload.get("message") or {}).get("content", "").strip()
 
-    return jsonify({"reply": reply_text, "session_id": session_id})
-  except Exception as e:
-    # This prints the FULL traceback to your server's terminal/logs, which is
-    # where you'll actually see the root cause (bad key, model access, etc).
-    app.logger.exception("ToyBot /chat failed")
-    return jsonify({"error": str(e)}), 500
+        if not reply_text:
+            app.logger.warning("Ollama returned no content. Raw response: %r", payload)
+            reply_text = "Sorry, I couldn't come up with an answer to that one — could you rephrase?"
+
+        history.append({"role": "assistant", "content": reply_text})
+        sessions[session_id] = history
+
+        return jsonify({"reply": reply_text, "session_id": session_id})
+
+    except requests.exceptions.ConnectionError:
+        app.logger.exception("Could not reach Ollama")
+        return jsonify({
+            "error": (
+                "Can't reach Ollama at " + OLLAMA_CHAT_URL + ". Is it running? "
+                "Open the Ollama app or run `ollama serve`, and make sure the model "
+                "is pulled: `ollama pull " + OLLAMA_MODEL + "`."
+            )
+        }), 503
+    except requests.exceptions.Timeout:
+        app.logger.exception("Ollama request timed out")
+        return jsonify({"error": "ToyBot took too long to respond. Try again."}), 504
+    except requests.exceptions.HTTPError as e:
+        app.logger.exception("Ollama returned an HTTP error")
+        return jsonify({"error": "Ollama error: " + str(e)}), 502
+    except Exception as e:
+        app.logger.exception("ToyBot /chat failed")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/reset", methods=["POST"])
+def reset():
+    """Optional: let the frontend clear a session's memory (e.g. a 'New chat' button)."""
+    data = request.get_json(force=True, silent=True) or {}
+    session_id = data.get("session_id")
+    if session_id and session_id in sessions:
+        del sessions[session_id]
+    return jsonify({"status": "reset"})
 
 
 @app.route("/health", methods=["GET"])
 def health():
-  return jsonify({"status": "ok"})
+    ollama_reachable = False
+    try:
+        r = requests.get(OLLAMA_TAGS_URL, timeout=3)
+        ollama_reachable = r.ok
+    except Exception:
+        ollama_reachable = False
+
+    return jsonify({
+        "status": "ok",
+        "model": OLLAMA_MODEL,
+        "ollama_reachable": ollama_reachable,
+    })
 
 
 if __name__ == "__main__":
-  app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
